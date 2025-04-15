@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Project files for ALX ES6 Basics",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "jest"
   },
