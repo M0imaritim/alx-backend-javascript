@@ -1,9 +1,11 @@
 {
   "name": "0x00-ES6_basic",
   "version": "1.0.0",
+  "type": "module",
   "description": "Project files for ALX ES6 Basics",
   "main": "index.js",
   "scripts": {
+    "dev": "node",
     "test": "jest"
   },
   "keywords": [],
