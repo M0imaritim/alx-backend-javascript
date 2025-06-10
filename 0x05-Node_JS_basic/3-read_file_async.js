@@ -14,7 +14,7 @@ function countStudents(path) {
         const students = lines.slice(1);
 
         const validStudents = students.filter(
-          (student) => student.trim() !== ''
+          (student) => student.trim() !== '',
         );
 
         console.log(`Number of students: ${validStudents.length}`);
