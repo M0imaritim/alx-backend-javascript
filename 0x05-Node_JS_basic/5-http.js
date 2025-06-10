@@ -1,77 +1,47 @@
 const http = require('http');
-const fs = require('fs');
 
-function countStudents(path) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) {
-        reject(new Error('Cannot load the database'));
-        return;
-      }
+const args = process.argv.slice(2);
 
-      try {
-        // Split into lines and filter out empty lines
-        const lines = data.split('\n').filter((line) => line.trim() !== '');
+const countStudents = require('./3-read_file_async');
 
-        // Remove header line
-        const students = lines.slice(1);
+const DATABASE = args[0];
 
-        // Filter out any remaining empty lines
-        const validStudents = students.filter((student) => student.trim() !== '');
-
-        let output = `Number of students: ${validStudents.length}\n`;
-
-        // Group students by field
-        const fields = {};
-
-        validStudents.forEach((student) => {
-          const studentData = student.split(',');
-          const firstName = studentData[0];
-          const field = studentData[3];
-
-          if (!fields[field]) {
-            fields[field] = [];
-          }
-          fields[field].push(firstName);
-        });
-
-        // Build output string for each field
-        Object.keys(fields).forEach((field) => {
-          const studentNames = fields[field];
-          output += `Number of students in ${field}: ${studentNames.length}. List: ${studentNames.join(', ')}\n`;
-        });
-
-        resolve(output.trim());
-      } catch (error) {
-        reject(new Error('Cannot load the database'));
-      }
-    });
-  });
-}
+const hostname = '127.0.0.1';
+const port = 1245;
 
 const app = http.createServer(async (req, res) => {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/plain');
+  const { url } = req;
 
-  if (req.url === '/') {
+  if (url === '/') {
     res.end('Hello ALX!');
-  } else if (req.url === '/students') {
-    const databasePath = process.argv[2];
-
+  } else if (url === '/students') {
+    res.write('This is the list of our students\n');
     try {
-      const studentData = await countStudents(databasePath);
-      res.end(`This is the list of our students\n${studentData}`);
+      // Capture console output
+      const originalLog = console.log;
+      const logs = [];
+      console.log = (...args) => {
+        logs.push(args.join(' '));
+      };
+
+      await countStudents(DATABASE);
+
+      // Restore original console.log
+      console.log = originalLog;
+
+      res.end(logs.join('\n'));
     } catch (error) {
-      res.end('This is the list of our students\nCannot load the database');
+      res.end(error.message);
     }
   } else {
     res.statusCode = 404;
-    res.end('Not Found');
+    res.end();
   }
 });
 
-app.listen(1245, () => {
-  console.log('Server running on http://localhost:1245/');
+app.listen(port, hostname, () => {
 });
 
 module.exports = app;
